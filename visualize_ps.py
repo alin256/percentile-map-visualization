@@ -94,7 +94,7 @@ small_line_width = .8
 for i, col_idx in enumerate(highlighted):
     col_sorted = np.sort(percentiles[:, col_idx])
     x = np.linspace(0, 1, len(col_sorted))
-    if i == 0 or i == 5:
+    if i == 0 or i == 5 or i == 6:
         plt.plot(x, col_sorted, 
             color=colors[i], 
             linewidth=small_line_width, 
@@ -108,6 +108,8 @@ for i, col_idx in enumerate(highlighted):
 n_all = len(sorted_percentiles)
 plt.plot(np.linspace(0, 1, n_all), sorted_percentiles, color="black", linewidth=1.5, label="All pixels")
 plt.plot([0, 1], [0, 100], label="Theoretical (uniform)", linestyle="--", color="red", linewidth=1.5)
+plt.axhline(95, color="gray", linestyle=":", linewidth=1.2, label="Outlier threshold P5/P95")
+plt.axhline(5,  color="gray", linestyle=":", linewidth=1.2)
 plt.xlabel("Rank (normalized)")
 plt.ylabel("Percentile")
 plt.title("Sorted percentiles — one curve per column")
