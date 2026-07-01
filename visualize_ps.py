@@ -51,7 +51,7 @@ sorted_percentiles = np.sort(percentiles.ravel())
 n = len(sorted_percentiles)
 theoretical = np.linspace(0, 100, n)
 
-COLORMAP = "cividis"
+COLORMAP = "plasma"
 
 plt.figure("Sorted Percentiles", figsize=(10, 6))
 
@@ -61,23 +61,17 @@ highlighted = list(range(6)) + [10] + list(range(20, n_cols, 20))
 
 n_colors = len(highlighted)
 
-colors = matplotlib.colormaps[COLORMAP](np.linspace(0, 1, n_cols))
+colors = matplotlib.colormaps[COLORMAP](np.linspace(0, 1, n_colors))
 
 
 plt.figure("Sorted Percentiles", figsize=(10, 6))
 
-for col_idx_hl in highlighted:
-    col_idx = highlighted[col_idx_hl]
+for i, col_idx in enumerate(highlighted):
     col_sorted = np.sort(percentiles[:, col_idx])
     x = np.linspace(0, 1, len(col_sorted))
-    if col_idx in highlighted:
-        plt.plot(x, col_sorted, 
-                 color=colors[col_idx_hl], 
-                 #  alpha=0.9, 
-                 linewidth=0.5, label=f"Column {col_idx}")
-    else:
-        pass
-        # plt.plot(x, col_sorted, color=colors[col_idx], alpha=0.2, linewidth=0.5)
+    plt.plot(x, col_sorted, 
+            color=colors[i], 
+            linewidth=0.5, label=f"Column {col_idx}")
 
 n_all = len(sorted_percentiles)
 plt.plot(np.linspace(0, 1, n_all), sorted_percentiles, color="black", linewidth=1.5, label="All pixels")
