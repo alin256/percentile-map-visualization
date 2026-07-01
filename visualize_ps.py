@@ -50,6 +50,19 @@ percentiles_crop = percentiles[:,0:15]
 over = percentiles > 95
 under = percentiles < 5
 
+# Combined outlier map: +1 = over, -1 = under, 0 = normal
+outlier_map = np.zeros_like(percentiles)
+outlier_map[over] = 1
+outlier_map[under] = -1
+
+plt.figure("Outliers", figsize=(10, 6))
+plt.imshow(outlier_map, aspect='auto', cmap="coolwarm", vmin=-1, vmax=1)
+cbar = plt.colorbar()
+cbar.set_ticks([-1, 0, 1])
+cbar.set_ticklabels(["Under (<5th)", "Normal", "Over (>95th)"])
+plt.title("Outlier map")
+save_fig("outliers")
+
 plt.figure("Over", figsize=(10, 6))
 # plt.imshow(ensemble[0])
 plt.imshow(over, aspect='auto')
