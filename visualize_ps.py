@@ -39,19 +39,26 @@ print(img.dtype)
 a2 = img
 a3 = ensemble
 
+eps = 1e-7
+
 # the <= outputs 0 or 1 thus mean gives percentage <=
 percentiles = 100. * np.mean(a3 <= a2[None, :, :], axis=0)
+percentiles_plus = 100. * np.mean(a3 <= a2[None, :, :]+eps, axis=0)
+percentiles_minus = 100. * np.mean(a3 <= a2[None, :, :]-eps, axis=0)
 
 print(percentiles.shape)
 
 percentiles = percentiles[:,120:]
-percentiles_crop = percentiles[:,0:15]
 
-over = percentiles > 95
-under = percentiles < 5
+percentiles_plus = percentiles_plus
+percentiles_minus = percentiles_minus
+# percentiles_crop = percentiles[:,0:15]
+
+over = percentiles_minus > 95
+under = percentiles_plus < 5
 
 # Combined outlier map: +1 = over, -1 = under, 0 = normal
-outlier_map = np.zeros_like(percentiles)
+outlier_map = np.zeros_like(percentiles_plus)
 outlier_map[over] = 1
 outlier_map[under] = -1
 
@@ -62,28 +69,6 @@ cbar.set_ticks([-1, 0, 1])
 cbar.set_ticklabels(["Under (<5th)", "Normal", "Over (>95th)"])
 plt.title("Outlier map")
 save_fig("outliers")
-
-plt.figure("Over", figsize=(10, 6))
-# plt.imshow(ensemble[0])
-plt.imshow(over, aspect='auto')
-plt.title("Pixels above 95th percentile")
-save_fig("over")
-
-plt.figure("Under", figsize=(10, 6))
-plt.imshow(under, aspect='auto')
-plt.title("Pixels below 5th percentile")
-save_fig("under")
-
-plt.figure("Percentiles", figsize=(10, 6))
-plt.imshow(percentiles_crop, aspect='auto', 
-        #    cmap="tab20b", 
-           vmin=0,
-           vmax=100
-           )
-plt.colorbar()
-plt.title("Percentile map")
-save_fig("percentiles")
-
 
 sorted_percentiles = np.sort(percentiles.ravel())
 n = len(sorted_percentiles)
