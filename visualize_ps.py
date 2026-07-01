@@ -1,6 +1,7 @@
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+import matplotlib.colors
 
 ensemble = np.load("ensemble_1000.npy")
 print(type(ensemble))
@@ -51,12 +52,24 @@ n = len(sorted_percentiles)
 theoretical = np.linspace(0, 100, n)
 
 plt.figure("Sorted Percentiles", figsize=(10, 6))
-plt.plot(sorted_percentiles, label="Observed")
-plt.plot(theoretical, label="Theoretical (uniform)", linestyle="--", color="red")
-plt.xlabel("Pixel rank")
+
+n_cols = percentiles.shape[1]
+colors = plt.cm.viridis(np.linspace(0, 1, n_cols))
+for col_idx in range(n_cols):
+    col_sorted = np.sort(percentiles[:, col_idx])
+    x = np.linspace(0, 1, len(col_sorted))
+    plt.plot(x, col_sorted, color=colors[col_idx], alpha=0.4, linewidth=0.5)
+
+n_all = len(sorted_percentiles)
+plt.plot(np.linspace(0, 1, n_all), sorted_percentiles, color="black", linewidth=1.5, label="All pixels")
+plt.plot([0, 1], [0, 100], label="Theoretical (uniform)", linestyle="--", color="red", linewidth=1.5)
+plt.xlabel("Rank (normalized)")
 plt.ylabel("Percentile")
-plt.title("Sorted percentiles across all pixels")
+plt.title("Sorted percentiles — one curve per column (left=purple, right=yellow)")
 plt.legend()
 plt.grid(True)
+
+sm = plt.cm.ScalarMappable(cmap="viridis", norm=matplotlib.colors.Normalize(vmin=0, vmax=n_cols - 1))
+plt.colorbar(sm, ax=plt.gca(), label="Column index (left → right)")
 
 plt.show()
