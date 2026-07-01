@@ -54,22 +54,31 @@ theoretical = np.linspace(0, 100, n)
 plt.figure("Sorted Percentiles", figsize=(10, 6))
 
 n_cols = percentiles.shape[1]
-colors = plt.cm.viridis(np.linspace(0, 1, n_cols))
+colors = plt.cm.tab20(np.linspace(0, 1, n_cols))
+
+highlighted = list(range(6)) + list(range(10, n_cols, 10))
+
+plt.figure("Sorted Percentiles", figsize=(10, 6))
+
 for col_idx in range(n_cols):
     col_sorted = np.sort(percentiles[:, col_idx])
     x = np.linspace(0, 1, len(col_sorted))
-    plt.plot(x, col_sorted, color=colors[col_idx], alpha=0.4, linewidth=0.5)
+    if col_idx in highlighted:
+        plt.plot(x, col_sorted, color=colors[col_idx], alpha=0.9, linewidth=0.5, label=f"Column {col_idx}")
+    else:
+        pass
+        # plt.plot(x, col_sorted, color=colors[col_idx], alpha=0.2, linewidth=0.5)
 
 n_all = len(sorted_percentiles)
 plt.plot(np.linspace(0, 1, n_all), sorted_percentiles, color="black", linewidth=1.5, label="All pixels")
 plt.plot([0, 1], [0, 100], label="Theoretical (uniform)", linestyle="--", color="red", linewidth=1.5)
 plt.xlabel("Rank (normalized)")
 plt.ylabel("Percentile")
-plt.title("Sorted percentiles — one curve per column (left=purple, right=yellow)")
-plt.legend()
+plt.title("Sorted percentiles — one curve per column")
+plt.legend(fontsize=7, ncol=2)
 plt.grid(True)
 
-sm = plt.cm.ScalarMappable(cmap="viridis", norm=matplotlib.colors.Normalize(vmin=0, vmax=n_cols - 1))
+sm = plt.cm.ScalarMappable(cmap="tab20", norm=matplotlib.colors.Normalize(vmin=0, vmax=n_cols - 1))
 plt.colorbar(sm, ax=plt.gca(), label="Column index (left → right)")
 
 plt.show()
