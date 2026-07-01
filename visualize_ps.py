@@ -123,4 +123,32 @@ cbar.set_ticks(np.linspace(0, n_colors - 1, n_colors))
 cbar.set_ticklabels([str(c) for c in highlighted])
 save_fig("sorted_percentiles")
 
+# KS distance from uniform for each column
+n_rows = percentiles.shape[0]
+uniform = np.linspace(0, 100, n_rows)
+ks_distances = np.array([
+    np.max(np.abs(np.sort(percentiles[:, c]) - uniform))
+    for c in range(n_cols)
+])
+
+ks_all_distances = np.zeros(n_cols)
+for c, ks in enumerate(ks_distances):
+    col_sorted = np.sort(percentiles[:, c])
+    all_interp = np.interp(np.linspace(0, 1, n_rows),
+                           np.linspace(0, 1, n_all),
+                           sorted_percentiles)
+    ks_all = np.max(np.abs(col_sorted - all_interp))
+    ks_all_distances[c] = ks_all
+    print(f"Col {c:3d}: KS_uniform = {ks:.2f}  KS_all = {ks_all:.2f}")
+
+plt.figure("KS Distances", figsize=(10, 6))
+plt.plot(ks_distances, label="vs. uniform", color="red", linewidth=1.2)
+plt.plot(ks_all_distances, label="vs. all-pixel curve", color="steelblue", linewidth=1.2)
+plt.xlabel("Column index")
+plt.ylabel("KS distance (percentile units)")
+plt.title("Per-column KS distance")
+plt.legend()
+plt.grid(True)
+save_fig("ks_distances")
+
 plt.show()
