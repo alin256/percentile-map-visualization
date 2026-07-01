@@ -57,7 +57,7 @@ plt.figure("Sorted Percentiles", figsize=(10, 6))
 
 n_cols = percentiles.shape[1]
 
-highlighted = list(range(6)) + [10] + list(range(20, n_cols, 20))
+highlighted = list(range(6)) + [10] + list(range(25, n_cols, 25))
 
 n_colors = len(highlighted)
 
@@ -82,7 +82,10 @@ plt.title("Sorted percentiles — one curve per column")
 plt.legend(fontsize=7, ncol=2)
 plt.grid(True)
 
-sm = plt.cm.ScalarMappable(cmap=COLORMAP, norm=matplotlib.colors.Normalize(vmin=0, vmax=n_cols - 1))
-plt.colorbar(sm, ax=plt.gca(), label="Column index (left → right)")
+norm = matplotlib.colors.BoundaryNorm(highlighted + [highlighted[-1] + 1], n_colors)
+sm = plt.cm.ScalarMappable(cmap=matplotlib.colormaps[COLORMAP].resampled(n_colors), norm=norm)
+cbar = plt.colorbar(sm, ax=plt.gca(), label="Column index")
+cbar.set_ticks([(highlighted[i] + highlighted[i+1]) / 2 for i in range(len(highlighted) - 1)] + [highlighted[-1] + 0.5])
+cbar.set_ticklabels([str(c) for c in highlighted])
 
 plt.show()
