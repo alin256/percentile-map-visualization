@@ -57,15 +57,13 @@ for row, (conf_label, k) in enumerate(confidence.items()):
         ax = axes[row][col]
         im = ax.imshow(std_masked, aspect="auto", cmap="viridis", vmin=0, vmax=vmax)
 
-        # Find furthest continuous column from x=0 that has any pixel below threshold
-        valid_cols = ~np.all(np.isnan(std_masked), axis=0)
-        if valid_cols[0]:
-            false_idx = np.argmax(~valid_cols)  # first invalid column
-            run_end = (std_masked.shape[1] - 1) if false_idx == 0 else (false_idx - 1)
-        else:
-            run_end = None
-        if run_end is not None:
-            ax.axvline(run_end, color="gray", linestyle="--", linewidth=1.2)
+        # For each row, find the first NaN column. Pad a True sentinel so
+        # fully-valid rows resolve to n_cols instead of 0.
+        nan_mask = np.isnan(std_masked)
+        padded = np.hstack([nan_mask, np.ones((nan_mask.shape[0], 1), dtype=bool)])
+        first_nan = np.argmax(padded, axis=1)
+        best_col = int(np.max(first_nan))
+        ax.axvline(best_col, color="black", linestyle="--", linewidth=1.5)
 
         pct_kept = 100 * np.sum(~np.isnan(std_masked)) / std_map.size
         ax.set_title(
