@@ -67,7 +67,7 @@ for row, (conf_label, k) in enumerate(confidence.items()):
 
         pct_kept = 100 * np.sum(~np.isnan(std_masked)) / std_map.size
         ax.set_title(
-            f"{conf_label}\n{gap_label}\nT={threshold:.4f}  ({pct_kept:.1f}% kept)",
+            f"{conf_label}\n{gap_label}\nT={threshold:.4f}  ({pct_kept:.1f}% kept)  col={best_col}",
             fontsize=9,
         )
         ax.axis("off")
