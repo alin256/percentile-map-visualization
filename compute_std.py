@@ -35,16 +35,19 @@ gaps = {
     "gap=0.18 (full range)":  0.18,
 }
 confidence = {
-    "99.7% (±3σ)":   3.000,
-    "95%   (±2σ)":   2.000,
+    "99.7% (±3σ)":    3.000,
+    "95%   (±2σ)":    2.000,
     "Q1–Q3 (±0.67σ)": 0.6745,
 }
 
 np.save(os.path.join(OUTDIR, "std_map.npy"), std_map)
 
+new_method_ns = [1, 2, 2.24]  # n·std ≤ gap  →  T = gap / n  (2.24 = 97.5% confidence)
+n_rows = len(confidence) + len(new_method_ns)
+
 fig, axes = plt.subplots(
-    len(confidence), len(gaps),
-    figsize=(5 * len(gaps), 4 * len(confidence)),
+    n_rows, len(gaps),
+    figsize=(5 * len(gaps), 4 * n_rows),
     squeeze=False,
 )
 
@@ -73,8 +76,30 @@ for row, (conf_label, k) in enumerate(confidence.items()):
         ax.axis("off")
         fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
 
+# --- New method rows: n·std ≤ gap  →  T = gap / n ---
+for i, n in enumerate(new_method_ns):
+    row = len(confidence) + i
+    for col, (gap_label, gap) in enumerate(gaps.items()):
+        threshold = gap / n
+        std_masked = np.where(std_map <= threshold, std_map, np.nan)
+        ax = axes[row][col]
+        im = ax.imshow(std_masked, aspect="auto", cmap="viridis", vmin=0, vmax=vmax)
+        nan_mask = np.isnan(std_masked)
+        padded = np.hstack([nan_mask, np.ones((nan_mask.shape[0], 1), dtype=bool)])
+        first_nan = np.argmax(padded, axis=1)
+        best_col = int(np.max(first_nan))
+        ax.axvline(best_col, color="black", linestyle="--", linewidth=1.5)
+        pct_kept = 100 * np.sum(~nan_mask) / std_map.size
+        ax.set_title(
+            f"n·std≤gap  n={n}\n{gap_label}\nT={threshold:.4f}  ({pct_kept:.1f}% kept)  col={best_col}",
+            fontsize=9,
+        )
+        ax.axis("off")
+        fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+
 fig.suptitle("Per-pixel std masked by threshold — all confidence × gap combinations", y=1.01)
 plt.tight_layout()
 plt.savefig(os.path.join(OUTDIR, "std_map.png"), dpi=300, bbox_inches="tight")
 plt.savefig(os.path.join(OUTDIR, "std_map.pdf"), bbox_inches="tight")
 print("Saved std_map.png and std_map.pdf to figures/")
+# plt.show()
