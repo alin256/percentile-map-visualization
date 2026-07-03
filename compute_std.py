@@ -56,6 +56,17 @@ for row, (conf_label, k) in enumerate(confidence.items()):
         std_masked = np.where(std_map <= threshold, std_map, np.nan)
         ax = axes[row][col]
         im = ax.imshow(std_masked, aspect="auto", cmap="viridis", vmin=0, vmax=vmax)
+
+        # Find furthest continuous column from x=0 that has any pixel below threshold
+        valid_cols = ~np.all(np.isnan(std_masked), axis=0)
+        if valid_cols[0]:
+            false_idx = np.argmax(~valid_cols)  # first invalid column
+            run_end = (std_masked.shape[1] - 1) if false_idx == 0 else (false_idx - 1)
+        else:
+            run_end = None
+        if run_end is not None:
+            ax.axvline(run_end, color="gray", linestyle="--", linewidth=1.2)
+
         pct_kept = 100 * np.sum(~np.isnan(std_masked)) / std_map.size
         ax.set_title(
             f"{conf_label}\n{gap_label}\nT={threshold:.4f}  ({pct_kept:.1f}% kept)",
